@@ -1,5 +1,6 @@
 ﻿
 using Business.Abstract;
+using Business.Constants;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using DataAccess.Concrete.InMemory;
@@ -22,21 +23,24 @@ namespace Business.Concrete
 
         public IResult Add(Product product)
         {
+            //magic strings
             if (product.ProductName.Length<2)
             {
-                return new ErrorResult("Ürün ismi en az 2 karakter olmalıdır");
+                return new ErrorResult(Messages.ProductNameInvalid);
 
             }
             _productDal.Add(product);
-            return new SuccessResult();
+            return new SuccessResult(Messages.ProductAdded);
         }
 
-        public List<Product> GetAll()
+        public IDataResult<List<Product>> GetAll()
         {
-            //İş kodları
-            //Yetkisi var mı?
+            if (DateTime.Now.Hour == 22)
+            {
+                return new ErrorDataResult();
+            }
 
-            return _productDal.GetAll();
+            return new SuccessDataResult<List<Product>>( _productDal.GetAll(),true,"Ürünler Listelendi");
         }
 
         public List<Product> GetAllByCategoryId(int id)
@@ -44,7 +48,7 @@ namespace Business.Concrete
             return _productDal.GetAll(p => p.CategoryId == id);
         }
 
-        public Product GetById(int productId)
+        public Product IDataResult GetById(int productId)
         {
             return _productDal.Get(p => p.ProductId == productId);
         }
